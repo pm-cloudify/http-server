@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// TODO: get these information from env variables to configure server
 func ConfigGinServer(router *gin.Engine) *http.Server {
 	return &http.Server{
 		Addr:           ":5000",
