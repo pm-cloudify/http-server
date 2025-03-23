@@ -15,6 +15,7 @@ func main() {
 
 	// config router
 	config.ConfigGinLogger(router)
+	config.ConfigMiddlewares(router)
 
 	// ping server
 	router.GET("/ping", func(c *gin.Context) {

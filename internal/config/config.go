@@ -8,6 +8,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func ConfigMiddlewares(router *gin.Engine) {
+	// router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+}
+
 // TODO: get these information from env variables to configure server
 func ConfigGinServer(router *gin.Engine) *http.Server {
 	return &http.Server{
@@ -34,6 +39,4 @@ func ConfigGinLogger(router *gin.Engine) {
 			err_msg,
 		)
 	}))
-
-	router.Use(gin.Recovery())
 }

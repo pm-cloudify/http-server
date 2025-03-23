@@ -4,20 +4,25 @@ import (
 	"errors"
 
 	"github.com/pm-cloudify/http-server/internal/database"
+	"github.com/pm-cloudify/http-server/pkg/auth"
 )
 
 func Login(username, password string) (string, error) {
-	// TODO: add a better authentication, also pass should not be saved as plain text!
 	var user *database.User
 	user, err := database.GetUserByUsername(username)
-
 	if err != nil {
 		return "", errors.New("user not fount")
 	}
 
-	if user.Pass != password {
+	if !auth.VerifyPassword(user.Pass, password) {
 		return "", errors.New("wrong password")
 	}
 
-	return "test", nil
+	token, err := auth.GenerateToken(user.Username)
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
