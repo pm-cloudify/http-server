@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pm-cloudify/http-server/internal/api/v1/models"
+	"github.com/pm-cloudify/http-server/internal/api/v1/services"
 )
 
 const MaxFileSize = 1024 // 1kB
@@ -45,5 +46,9 @@ func Upload(c *gin.Context) {
 	}
 
 	// TODO: upload to s3 using different route, then notify user
+	if err := services.UploadFile(data.File, c.GetString("username")); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to savie file"})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "file uploaded"})
 }
