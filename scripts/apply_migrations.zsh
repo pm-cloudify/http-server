@@ -1,1 +1,2 @@
-migrate -path ../migrations -database "postgres://test_user:Sample1234Pass@localhost:5432/pm_cloudify_db?sslmode=disable" up
+migrate -path ../migrations/ -database "postgres://test_user:Sample1234Pass@localhost:5432/pm_cloudify_db?sslmode=disable" up
+
