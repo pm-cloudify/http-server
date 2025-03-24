@@ -1,6 +1,8 @@
 package models
 
-import "mime/multipart"
+import (
+	"mime/multipart"
+)
 
 // login request body
 // can be from a form or a json body
@@ -14,4 +16,15 @@ type LoginRequest struct {
 type ReceivedFileRequest struct {
 	Inputs string                `form:"inputs"`
 	File   *multipart.FileHeader `form:"file"`
+}
+
+// file info data
+type FileInfo struct {
+	ID       int    `json:"id"`
+	Filename string `json:"filename"`
+}
+
+// list of files information
+type FilesList struct {
+	Data []FileInfo `json:"data"`
 }

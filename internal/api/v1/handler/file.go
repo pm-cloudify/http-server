@@ -12,6 +12,7 @@ import (
 
 const MaxFileSize = 1024 // 1kB
 
+// upload a file
 func Upload(c *gin.Context) {
 	data_type := strings.Split(c.Request.Header.Get("Content-Type"), ";")[0]
 	if data_type != "multipart/form-data" {
@@ -47,14 +48,31 @@ func Upload(c *gin.Context) {
 
 	// TODO: upload to s3 using different route, then notify user
 	if c.GetString("username") == "" {
-		c.JSON(http.StatusNetworkAuthenticationRequired, gin.H{"error": "no authorized user"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized user"})
 		return
 	}
 
 	if err := services.UploadFile(data.File, c.GetString("username")); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to savie file"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save file"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "file uploaded"})
+}
+
+// TODO: paginate
+// get list of uploaded files
+func GetListOfFiles(c *gin.Context) {
+	// request for list of files
+	if c.GetString("username") == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized user"})
+		return
+	}
+
+	data, err := services.GetListOfUploads(c.GetString("username"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "cannot request for file info"})
+		return
+	}
+	c.JSON(http.StatusOK, data)
 }

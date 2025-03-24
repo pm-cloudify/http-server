@@ -14,6 +14,7 @@ func SetupRoutes(router *gin.Engine) {
 	authorized_v1 := router.Group("/api/v1")
 	authorized_v1.Use(middleware.AuthMiddleware())
 	{
+		authorized_v1.GET("/upload/list", handler.GetListOfFiles)
 		authorized_v1.POST("/upload", handler.Upload)
 	}
 }
