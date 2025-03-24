@@ -46,9 +46,15 @@ func Upload(c *gin.Context) {
 	}
 
 	// TODO: upload to s3 using different route, then notify user
+	if c.GetString("username") == "" {
+		c.JSON(http.StatusNetworkAuthenticationRequired, gin.H{"error": "no authorized user"})
+		return
+	}
+
 	if err := services.UploadFile(data.File, c.GetString("username")); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to savie file"})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "file uploaded"})
 }
