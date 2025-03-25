@@ -93,9 +93,10 @@ func AddUploadedFileInfo(filename, username string) error {
 }
 
 // TODO: Paginate data
+// TODO: Config limit rate
 // retrieve data on uploads table
 func GetUploadsByUsername(username string) ([]Upload, error) {
-	query := `SELECT id, filename, username, enable FROM uploads WHERE username = $1`
+	query := `SELECT id, filename, username, enable FROM uploads WHERE username = $1 LIMIT 5`
 
 	rows, err := DB.Query(context.Background(), query, username)
 	if err != nil {
