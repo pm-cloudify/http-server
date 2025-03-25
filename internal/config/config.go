@@ -3,14 +3,40 @@ package config
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func ConfigMiddlewares(router *gin.Engine) {
 	// router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+
+	// TODO: check development and production mode and apply different policies
+	// config CORS policy
+	router.Use(cors.New(cors.Config{
+		AllowOriginFunc: func(origin string) bool {
+			// Allow requests with no origin (like mobile apps or curl requests)
+			if origin == "" {
+				return true
+			}
+
+			// Allow same origin requests
+			if strings.HasPrefix(origin, "http://localhost:") ||
+				strings.HasPrefix(origin, "https://localhost:") {
+				return true
+			}
+
+			return false
+		},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Accept"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: false,
+		MaxAge:           24 * time.Hour,
+	}))
 }
 
 // TODO: get these information from env variables to configure server
