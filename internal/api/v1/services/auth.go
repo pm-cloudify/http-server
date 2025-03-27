@@ -11,7 +11,11 @@ func Login(username, password string) (string, error) {
 	var user *database.User
 	user, err := database.GetUserByUsername(username)
 	if err != nil {
-		return "", errors.New("user not fount")
+		return "", errors.New("database failed")
+	}
+
+	if err == nil && user == nil {
+		return "", errors.New("user not found")
 	}
 
 	if !auth.VerifyPassword(user.Pass, password) {

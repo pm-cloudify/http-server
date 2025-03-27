@@ -64,7 +64,10 @@ func GetUserByUsername(username string) (*User, error) {
 	var user User
 
 	err := row.Scan(&user.ID, &user.Username, &user.Pass, &user.Email)
-	if err != nil {
+	if err != nil && err.Error() == "no rows in result set" {
+		log.Println(err.Error())
+		return nil, nil
+	} else if err != nil {
 		log.Printf("Failed to fetch user: %s\n", err.Error())
 		return nil, err
 	}

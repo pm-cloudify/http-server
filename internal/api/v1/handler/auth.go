@@ -21,6 +21,10 @@ func Login(c *gin.Context) {
 	// getting token from logic
 	token, err := services.Login(loginRequest.Username, loginRequest.Password)
 	if err != nil {
+		if err.Error() == "database failed" {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
