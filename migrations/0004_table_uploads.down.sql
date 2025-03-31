@@ -1,1 +1,1 @@
-DROP TABLE uploads;
+ALTER TABLE uploads DROP COLUMN enable;

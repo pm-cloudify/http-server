@@ -1,2 +1,0 @@
-ALTER TABLE uploads
-ADD COLUMN enable BOOLEAN NOT NULL DEFAULT false;
