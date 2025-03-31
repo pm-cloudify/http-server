@@ -1,11 +1,16 @@
 package auth
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"errors"
+	"fmt"
+	"log"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/crypto/argon2"
 )
 
 // TODO: handle secret key better
@@ -19,21 +24,6 @@ func GenerateToken(username string) (string, error) {
 	})
 
 	return token.SignedString([]byte(SecretKey))
-}
-
-// TODO: verify password, for now it is not hashed password
-func VerifyPassword(hashedPassword, password string) bool {
-	// TODO: save hashed passwords
-	return hashedPassword == password
-}
-
-// hashing passwords
-func HashPassword(password string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	return string(hashedPassword), nil
 }
 
 // validating tokens
@@ -56,4 +46,118 @@ func ValidateToken(tokenStr string) (jwt.MapClaims, error) {
 	}
 
 	return nil, errors.New("invalid token")
+}
+
+type Argon2Params struct {
+	Memory      uint32
+	Iterations  uint32
+	Parallelism uint8
+	SaltLength  uint32
+	KeyLength   uint32
+}
+
+// TODO: 1- import conf from env
+// TODO: 2- read more about effects of this config
+// TODO: 3- use a wrapper pkg to use Argon2
+var DefaultArgon2Params = Argon2Params{
+	Memory:      64 * 1024,
+	Iterations:  3,
+	Parallelism: 2,
+	SaltLength:  16,
+	KeyLength:   32,
+}
+
+func GenerateHash(password string, p Argon2Params) (string, error) {
+	// generate salt
+	salt := make([]byte, p.SaltLength)
+	if _, err := rand.Read(salt); err != nil {
+		return "", err
+	}
+
+	// generate hash
+	hash := argon2.IDKey(
+		[]byte(password),
+		salt,
+		p.Iterations,
+		p.Memory,
+		p.Parallelism,
+		p.KeyLength,
+	)
+
+	// encode salt and hash with b64
+	b64_salt := base64.RawStdEncoding.EncodeToString(salt)
+	b64_hash := base64.RawStdEncoding.EncodeToString(hash)
+
+	encoded := fmt.Sprintf(
+		"$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
+		argon2.Version,
+		p.Memory,
+		p.Iterations,
+		p.Parallelism,
+		b64_salt,
+		b64_hash,
+	)
+
+	log.Printf("encoded pass: %s", encoded)
+	return encoded, nil
+}
+
+func VerifyPassword(encoded, password string) (bool, error) {
+	// decode stored hash
+	parts := strings.Split(encoded, "$")
+	log.Println(parts)
+	if len(parts) != 6 {
+		log.Printf("invalid encoded password format")
+		return false, errors.New("invalid hash format")
+	}
+
+	// parse params
+	var version int
+	_, err := fmt.Sscanf(parts[2], "v=%d", &version)
+	if err != nil {
+		return false, err
+	}
+	if version != argon2.Version {
+		return false, errors.New("incompatible argon2 version")
+	}
+
+	p := Argon2Params{}
+	_, err = fmt.Sscanf(parts[3], "m=%d,t=%d,p=%d", &p.Memory, &p.Iterations, &p.Parallelism)
+	if err != nil {
+		return false, err
+	}
+
+	salt, err := base64.RawStdEncoding.DecodeString(parts[4])
+	if err != nil {
+		return false, err
+	}
+	p.SaltLength = uint32(len(salt))
+
+	storedHash, err := base64.RawStdEncoding.DecodeString(parts[5])
+	if err != nil {
+		return false, err
+	}
+	p.KeyLength = uint32(len(storedHash))
+
+	// generate hash with same parameters
+	comparisonHash := argon2.IDKey(
+		[]byte(password),
+		salt,
+		p.Iterations,
+		p.Memory,
+		p.Parallelism,
+		p.KeyLength,
+	)
+
+	// constant time comparison
+	if len(comparisonHash) != len(storedHash) {
+		return false, nil
+	}
+	for i := 0; i < len(comparisonHash); i++ {
+		if comparisonHash[i] != storedHash[i] {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }
