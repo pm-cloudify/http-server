@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -58,7 +59,15 @@ func CloseDB() {
 func AddUser(username, hashed_password string) error {
 	query := `INSERT INTO users(username, password_hash) VALUES ($1, $2)`
 
-	if _, err := DB.Query(context.Background(), query, username, hashed_password); err != nil {
+	if _, err := DB.Exec(context.Background(), query, username, hashed_password); err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" {
+				return errors.New("username exists")
+			}
+		}
+		log.Println(pgErr)
+
 		return err
 	}
 	return nil
@@ -89,7 +98,7 @@ func GetUserByUsername(username string) (*User, error) {
 func UpdateUploadedFileInfoByID(id int, enable bool) error {
 	query := `UPDATE uploads SET enable = $1 WHERE id=$2`
 
-	if _, err := DB.Query(context.Background(), query, enable, id); err != nil {
+	if _, err := DB.Exec(context.Background(), query, enable, id); err != nil {
 		return err
 	}
 	return nil

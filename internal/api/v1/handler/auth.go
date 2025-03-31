@@ -52,6 +52,8 @@ func SignIn(c *gin.Context) {
 		var status = http.StatusBadRequest
 		if err.Error() == "failed to create account" {
 			status = http.StatusInternalServerError
+		} else if err.Error() == "username exists" {
+			status = http.StatusConflict
 		}
 		c.JSON(status, gin.H{"error": err.Error()})
 		return

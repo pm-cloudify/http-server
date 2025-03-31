@@ -4,13 +4,14 @@ import (
 	"errors"
 	"log"
 	"regexp"
+	"strings"
 
 	"github.com/pm-cloudify/http-server/internal/database"
 	"github.com/pm-cloudify/http-server/pkg/auth"
 )
 
 // var PasswordPattern = regexp.MustCompile(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]+$`)
-var UsernamePattern = regexp.MustCompile(`^[a-zA-Z]{8,}$`)
+var UsernamePattern = regexp.MustCompile(`^[a-z]+$`)
 
 func isValidUsername(username string) error {
 	if len(username) < 4 {
@@ -98,9 +99,12 @@ func SingIn(username, password string) error {
 
 	// validate user and pass
 	if err := isPasswordValid(password); err != nil {
+		log.Println(err.Error())
 		return errors.New("invalid password")
 	}
+	username = strings.ToLower(username)
 	if err := isValidUsername(username); err != nil {
+		log.Println(err.Error())
 		return errors.New("invalid username")
 	}
 
@@ -115,6 +119,9 @@ func SingIn(username, password string) error {
 	err = database.AddUser(username, hashed_pass)
 	if err != nil {
 		log.Printf("db-error: %s", err.Error())
+		if err.Error() == "username exists" {
+			return err
+		}
 		return errors.New("failed to create account")
 	}
 
