@@ -11,11 +11,10 @@ import (
 
 // users table data
 type User struct {
-	ID        int
-	Username  string
-	Pass      string
-	Email     string
-	CreatedAt string
+	ID             int
+	Username       string
+	HashedPassword string
+	CreatedAt      string
 }
 
 // uploads table data
@@ -76,13 +75,13 @@ func AddUser(username, hashed_password string) error {
 // get user data by username from users table
 func GetUserByUsername(username string) (*User, error) {
 	// TODO: check for query injection ?
-	query := `SELECT id, username, pass, email FROM users WHERE username = $1`
+	query := `SELECT id, username, password_hash FROM users WHERE username = $1`
 
 	row := DB.QueryRow(context.Background(), query, username)
 
 	var user User
 
-	err := row.Scan(&user.ID, &user.Username, &user.Pass, &user.Email)
+	err := row.Scan(&user.ID, &user.Username, &user.HashedPassword)
 	if err != nil && err.Error() == "no rows in result set" {
 		log.Println(err.Error())
 		return nil, nil

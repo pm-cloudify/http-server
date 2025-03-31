@@ -67,6 +67,12 @@ func isPasswordValid(password string) error {
 
 // login user. returns a token for user
 func Login(username, password string) (string, error) {
+
+	username = strings.ToLower(username)
+	if err := isValidUsername(username); err != nil {
+		return "", err
+	}
+
 	var user *database.User
 	user, err := database.GetUserByUsername(username)
 	if err != nil {
@@ -76,11 +82,11 @@ func Login(username, password string) (string, error) {
 	if user == nil {
 		return "", errors.New("user not found")
 	}
-	isPassValid, err := auth.VerifyPassword(user.Pass, password)
+	isPassValid, err := auth.VerifyPassword(user.HashedPassword, password)
 	if err != nil {
 		return "", errors.New("verification failed")
 	}
-	if isPassValid {
+	if !isPassValid {
 		return "", errors.New("wrong password")
 	}
 
@@ -99,12 +105,10 @@ func SingIn(username, password string) error {
 
 	// validate user and pass
 	if err := isPasswordValid(password); err != nil {
-		log.Println(err.Error())
 		return errors.New("invalid password")
 	}
 	username = strings.ToLower(username)
 	if err := isValidUsername(username); err != nil {
-		log.Println(err.Error())
 		return errors.New("invalid username")
 	}
 
