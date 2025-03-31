@@ -54,6 +54,16 @@ func CloseDB() {
 	}
 }
 
+// TODO: add user to users table
+func AddUser(username, hashed_password string) error {
+	query := `INSERT INTO users(username, password_hash) VALUES ($1, $2)`
+
+	if _, err := DB.Query(context.Background(), query, username, hashed_password); err != nil {
+		return err
+	}
+	return nil
+}
+
 // get user data by username from users table
 func GetUserByUsername(username string) (*User, error) {
 	// TODO: check for query injection ?
