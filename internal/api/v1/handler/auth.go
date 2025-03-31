@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,13 +9,19 @@ import (
 	"github.com/pm-cloudify/http-server/internal/api/v1/services"
 )
 
+func checkLoginRequestBind(c *gin.Context, data *models.LoginRequest) error {
+	err := c.ShouldBind(data)
+	if err != nil || data.Username == "" || data.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return errors.New("invalid request body")
+	}
+	return nil
+}
+
 func Login(c *gin.Context) {
 	var loginRequest models.LoginRequest
 
-	// getting required data from request
-	err := c.ShouldBind(&loginRequest)
-	if err != nil || loginRequest.Username == "" || loginRequest.Password == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+	if err := checkLoginRequestBind(c, &loginRequest); err != nil {
 		return
 	}
 
@@ -30,4 +37,25 @@ func Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"token": token})
+}
+
+func SignIn(c *gin.Context) {
+	var signInRequest models.LoginRequest
+
+	if err := checkLoginRequestBind(c, &signInRequest); err != nil {
+		return
+	}
+
+	err := services.SingIn(signInRequest.Username, signInRequest.Password)
+
+	if err != nil {
+		var status = http.StatusBadRequest
+		if err.Error() == "failed to create account" {
+			status = http.StatusInternalServerError
+		}
+		c.JSON(status, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "account created successfully"})
 }

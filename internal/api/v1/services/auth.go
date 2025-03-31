@@ -98,23 +98,23 @@ func SingIn(username, password string) error {
 
 	// validate user and pass
 	if err := isPasswordValid(password); err != nil {
-		return err
+		return errors.New("invalid password")
 	}
 	if err := isValidUsername(username); err != nil {
-		return err
+		return errors.New("invalid username")
 	}
 
 	// generate hashed password
 	hashed_pass, err := auth.GenerateHash(password, auth.DefaultArgon2Params)
 	if err != nil {
-		log.Printf("error: %s", err.Error())
-		return errors.New("processing account password failed")
+		log.Printf("hash-error: %s", err.Error())
+		return errors.New("failed to create account")
 	}
 
 	// insert user to db
 	err = database.AddUser(username, hashed_pass)
 	if err != nil {
-		log.Printf("error: %s", err.Error())
+		log.Printf("db-error: %s", err.Error())
 		return errors.New("failed to create account")
 	}
 

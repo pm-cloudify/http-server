@@ -10,6 +10,7 @@ import (
 func SetupRoutes(router *gin.Engine) {
 
 	router.POST("api/v1/login", handler.Login)
+	router.POST("api/v1/signin", handler.SignIn)
 
 	authorized_v1 := router.Group("/api/v1")
 	authorized_v1.Use(middleware.AuthMiddleware())
