@@ -2,13 +2,38 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
+
+type AppEnv struct {
+	AC_SecretKey   string
+	AC_AccessKey   string
+	AC_S3Bucket    string
+	AC_S3_Endpoint string
+	AC_S3_Region   string
+}
+
+var LoadedEnv AppEnv
+
+func MustLoadENV() {
+	if err := godotenv.Load("configs/.env"); err != nil {
+		log.Panicln(err.Error())
+	}
+	LoadedEnv.AC_S3Bucket = os.Getenv("S3_BUCKET")
+	LoadedEnv.AC_SecretKey = os.Getenv("SECRET_KEY")
+	LoadedEnv.AC_AccessKey = os.Getenv("ACCESS_KEY")
+	LoadedEnv.AC_S3_Endpoint = os.Getenv("S3_ENDPOINT")
+	LoadedEnv.AC_S3_Region = os.Getenv("S3_REGION")
+	log.Println(LoadedEnv)
+}
 
 func ConfigMiddlewares(router *gin.Engine) {
 	// router.Use(gin.Logger())
