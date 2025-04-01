@@ -3,9 +3,12 @@ module github.com/pm-cloudify/http-server
 go 1.24.1
 
 require (
+	github.com/aws/aws-sdk-go v1.55.6
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gin-contrib/cors v1.7.4
 	github.com/gin-gonic/gin v1.10.0
 	github.com/jackc/pgx/v5 v5.7.3
+	github.com/joho/godotenv v1.5.1
 	golang.org/x/crypto v0.36.0
 )
 
@@ -14,7 +17,6 @@ require (
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
-	github.com/gin-contrib/cors v1.7.4 // indirect
 	github.com/gin-contrib/sse v1.0.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
@@ -23,6 +25,7 @@ require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.10 // indirect
 	github.com/kr/text v0.2.0 // indirect

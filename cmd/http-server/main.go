@@ -8,10 +8,14 @@ import (
 	v1 "github.com/pm-cloudify/http-server/internal/api/v1"
 	"github.com/pm-cloudify/http-server/internal/config"
 	"github.com/pm-cloudify/http-server/internal/database"
+	"github.com/pm-cloudify/http-server/pkg/acs3"
 )
 
 func main() {
 	router := gin.New()
+
+	// loading env
+	config.MustLoadENV()
 
 	// config router
 	config.ConfigGinLogger(router)
@@ -34,6 +38,9 @@ func main() {
 		log.Fatal("database connection failed!")
 	}
 	defer database.CloseDB()
+
+	// Initialize connection to s3
+	acs3.InitConnection()
 
 	// config and run server
 	server := config.ConfigGinServer(router)

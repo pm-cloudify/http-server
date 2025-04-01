@@ -1,4 +1,4 @@
-package s3
+package acs3
 
 func UploadObject(key, serialized_object string) error {
 	return nil
