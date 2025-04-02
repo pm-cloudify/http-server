@@ -41,6 +41,7 @@ func main() {
 
 	// Initialize connection to s3
 	acs3.InitConnection()
+	acs3.GetBuckets()
 
 	// config and run server
 	server := config.ConfigGinServer(router)
