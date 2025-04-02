@@ -30,7 +30,7 @@ func UploadFile(file *multipart.FileHeader, username string) error {
 			log.Printf("error: file with no record exists. key ->\"%s\"\n", fileKey)
 		}
 		log.Println(err.Error())
-		return err.Error("failed to save record")
+		return errors.New("failed to save record")
 	}
 
 	return nil
