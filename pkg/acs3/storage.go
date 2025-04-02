@@ -77,7 +77,7 @@ func GetObject(bucketName, objectKey string) ([]byte, error) {
 }
 
 // uploads file end returns generated file key.
-func UploadObject(bucketName, objectKey string, fileHeader *multipart.FileHeader) (string, error) {
+func UploadObject(bucketName string, fileHeader *multipart.FileHeader) (string, error) {
 	uploader := s3manager.NewUploaderWithClient(svc)
 
 	file, err := fileHeader.Open()
@@ -86,7 +86,11 @@ func UploadObject(bucketName, objectKey string, fileHeader *multipart.FileHeader
 	}
 	defer file.Close()
 
-	hash := uuid.New().String()
+	rand, err := uuid.NewRandom()
+	if err != nil {
+		return "", err
+	}
+	hash := rand.String()
 
 	_, err = uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucketName),

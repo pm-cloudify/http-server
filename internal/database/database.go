@@ -104,10 +104,10 @@ func UpdateUploadedFileInfoByID(id int, enable bool) error {
 }
 
 // add a upload info
-func AddUploadedFileInfo(filename, username string) error {
-	query := `INSERT INTO uploads(filename, username) VALUES ($1, $2)`
+func AddUploadedFileInfo(filename, username, fileKey string) error {
+	query := `INSERT INTO uploads(filename, username, file_key) VALUES ($1, $2, $3)`
 
-	if _, err := DB.Query(context.Background(), query, filename, username); err != nil {
+	if _, err := DB.Query(context.Background(), query, filename, username, fileKey); err != nil {
 		return err
 	}
 	return nil
