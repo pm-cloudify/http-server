@@ -10,7 +10,7 @@ import (
 	"github.com/pm-cloudify/http-server/internal/api/v1/services"
 )
 
-const MaxFileSize = 1024 // 1kB
+const MaxFileSize = 1024 * 1024 // 1MB
 
 // upload a file
 func Upload(c *gin.Context) {
@@ -46,7 +46,6 @@ func Upload(c *gin.Context) {
 		return
 	}
 
-	// TODO: upload to s3 using different route, then notify user
 	if c.GetString("username") == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized user"})
 		return

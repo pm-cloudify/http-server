@@ -4,9 +4,11 @@ import (
 	"errors"
 	"log"
 	"mime/multipart"
+	"os"
 
 	"github.com/pm-cloudify/http-server/internal/api/v1/models"
 	"github.com/pm-cloudify/http-server/internal/database"
+	"github.com/pm-cloudify/http-server/pkg/acs3"
 )
 
 // upload file to s3 and register in database
@@ -15,16 +17,26 @@ func UploadFile(file *multipart.FileHeader, username string) error {
 		return errors.New("null args")
 	}
 
-	// save record to db. hold id of created record
-	filename := file.Filename
-	if err := database.AddUploadedFileInfo(filename, username); err != nil {
-		return err
+	// save data to s3
+	fileKey, err := acs3.UploadObject(os.Getenv("S3_BUCKET"), file)
+	if err != nil {
+		return errors.New("cannot save file")
 	}
 
-	// TODO: 2 - upload file to s3 storage. user id of created record : save (id-filename.ext)
+	// save record to db hold id of created record
+	if err := database.AddUploadedFileInfo(file.Filename, username, fileKey); err != nil {
+		err2 := acs3.DeleteObject(os.Getenv("S3_BUCKET"), fileKey)
+		if err2 != nil {
+			log.Printf("error: file with no record exists. key ->\"%s\"\n", fileKey)
+		}
+		log.Println(err.Error())
+		return err.Error("failed to save record")
+	}
+
 	return nil
 }
 
+// returns list of saved files
 func GetListOfUploads(username string) (*models.FilesList, error) {
 	if username == "" {
 		return nil, errors.New("null args")
@@ -38,8 +50,7 @@ func GetListOfUploads(username string) (*models.FilesList, error) {
 		return nil, err
 	}
 
-	// TODO: what is nilness
-	// TODO: find better implementation for parsing received data (or limit queries information)
+	// TODO: find better implementation for parsing received data (or limit queries information / paginate)
 	var prepared_data []models.FileInfo
 	for _, v := range gathered_data {
 		var data models.FileInfo
