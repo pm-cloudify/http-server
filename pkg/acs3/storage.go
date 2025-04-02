@@ -2,19 +2,21 @@ package acs3
 
 import (
 	"log"
-	"os"
+	"mime/multipart"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/google/uuid"
 	"github.com/pm-cloudify/http-server/internal/config"
 )
 
 var sess *session.Session
 var svc *s3.S3
 
+// initiate a connection to s3
 func InitConnection() {
 	var err error
 
@@ -34,7 +36,8 @@ func InitConnection() {
 	}
 }
 
-func GetBuckets() ([]*s3.Bucket, error) {
+// returns list of existing buckets
+func ListBuckets() ([]*s3.Bucket, error) {
 	result, err := svc.ListBuckets(nil)
 	if err != nil {
 		return nil, err
@@ -43,6 +46,7 @@ func GetBuckets() ([]*s3.Bucket, error) {
 	return result.Buckets, nil
 }
 
+// returns list of existing objects
 func ListObjects(bucketName string) ([]*s3.Object, error) {
 	resp, err := svc.ListObjectsV2(&s3.ListObjectsV2Input{
 		Bucket: aws.String(bucketName),
@@ -54,43 +58,51 @@ func ListObjects(bucketName string) ([]*s3.Object, error) {
 	return resp.Contents, nil
 }
 
-func GetObject(bucketName, objectKey, filePath string) error {
+// download an object from storage
+func GetObject(bucketName, objectKey string) ([]byte, error) {
 	downloader := s3manager.NewDownloaderWithClient(svc)
-	file, err := os.Create(filePath)
 
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+	buffer := aws.NewWriteAtBuffer([]byte{})
 
-	_, err = downloader.Download(file,
+	_, err := downloader.Download(buffer,
 		&s3.GetObjectInput{
 			Bucket: aws.String(bucketName),
 			Key:    aws.String(objectKey),
 		})
 
-	return err
+	if err != nil {
+		return nil, err
+	}
+	return buffer.Bytes(), err
 }
 
-// TODO: add a version which gets a stream of data and sends it
-func UploadObject(bucketName, objectKey, filePath string) error {
+// uploads file end returns generated file key.
+func UploadObject(bucketName, objectKey string, fileHeader *multipart.FileHeader) (string, error) {
 	uploader := s3manager.NewUploaderWithClient(svc)
 
-	file, err := os.Open(filePath)
+	file, err := fileHeader.Open()
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer file.Close()
 
+	hash := uuid.New().String()
+
 	_, err = uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucketName),
-		Key:    aws.String(objectKey),
+		Key:    aws.String(hash),
 		Body:   file,
 	})
 
-	return err
+	if err != nil {
+		return "", err
+	}
+
+	log.Println("file uploaded: ", hash)
+	return hash, err
 }
 
+// removes an object with given key
 func DeleteObject(bucketName, objectKey string) error {
 	_, err := svc.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(bucketName),
