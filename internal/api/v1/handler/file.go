@@ -52,7 +52,7 @@ func Upload(c *gin.Context) {
 	}
 
 	if err := services.UploadFile(data.File, c.GetString("username")); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to save file"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
