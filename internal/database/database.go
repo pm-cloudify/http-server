@@ -24,6 +24,7 @@ type Upload struct {
 	Username  string
 	CreatedAt string
 	Enable    bool
+	FileKey   string
 }
 
 // database
@@ -140,4 +141,24 @@ func GetUploadsByUsername(username string) ([]Upload, error) {
 	}
 
 	return uploads, nil
+}
+
+// get user data by username from users table
+func GetUploadByFileId(file_id uint) (*Upload, error) {
+	query := `SELECT id, filename, username, enable, file_key FROM users WHERE id = $1`
+
+	row := DB.QueryRow(context.Background(), query, file_id)
+
+	var data Upload
+
+	err := row.Scan(&data.ID, &data.Filename, &data.Username, &data.Enable, &data.FileKey)
+	if err != nil && err.Error() == "no rows in result set" {
+		log.Println(err.Error())
+		return nil, nil
+	} else if err != nil {
+		log.Printf("Failed to fetch upload info: %s\n", err.Error())
+		return nil, err
+	}
+
+	return &data, nil
 }
