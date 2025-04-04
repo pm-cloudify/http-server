@@ -28,3 +28,8 @@ type FileInfo struct {
 type FilesList struct {
 	Data []FileInfo `json:"data"`
 }
+
+// job request body
+type JobRequest struct {
+	FileID uint `json:"file_id"`
+}

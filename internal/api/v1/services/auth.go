@@ -3,11 +3,12 @@ package services
 import (
 	"errors"
 	"log"
+	"os"
 	"regexp"
 	"strings"
 
-	"github.com/pm-cloudify/http-server/internal/database"
-	"github.com/pm-cloudify/http-server/pkg/auth"
+	"github.com/pm-cloudify/shared-libs/auth"
+	database "github.com/pm-cloudify/shared-libs/psql"
 )
 
 // var PasswordPattern = regexp.MustCompile(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]+$`)
@@ -90,7 +91,7 @@ func Login(username, password string) (string, error) {
 		return "", errors.New("wrong password")
 	}
 
-	token, err := auth.GenerateToken(user.Username)
+	token, err := auth.GenerateToken(user.Username, os.Getenv("APP_SECRET"))
 
 	if err != nil {
 		return "", err

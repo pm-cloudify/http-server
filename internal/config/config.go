@@ -11,6 +11,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/pm-cloudify/shared-libs/mb"
 )
 
 type AppEnv struct {
@@ -33,6 +34,20 @@ func MustLoadENV() {
 	LoadedEnv.AC_S3_Endpoint = os.Getenv("S3_ENDPOINT")
 	LoadedEnv.AC_S3_Region = os.Getenv("S3_REGION")
 	log.Println(LoadedEnv)
+}
+
+func SetupRabbitMQ() *mb.MessageBroker {
+	mb, err := mb.InitMessageBroker(
+		os.Getenv("RMQ_ADDR"),
+		os.Getenv("RMQ_USER"),
+		os.Getenv("RMQ_PASS"),
+		os.Getenv("RMQ_Q_NAME"),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
+	}
+
+	return mb
 }
 
 func ConfigMiddlewares(router *gin.Engine) {

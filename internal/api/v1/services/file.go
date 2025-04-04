@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/pm-cloudify/http-server/internal/api/v1/models"
-	"github.com/pm-cloudify/http-server/internal/database"
-	"github.com/pm-cloudify/http-server/pkg/acs3"
+	"github.com/pm-cloudify/shared-libs/acs3"
+	database "github.com/pm-cloudify/shared-libs/psql"
 )
 
 // upload file to s3 and register in database

@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	v1 "github.com/pm-cloudify/http-server/internal/api/v1"
 	"github.com/pm-cloudify/http-server/internal/config"
-	"github.com/pm-cloudify/http-server/internal/database"
-	"github.com/pm-cloudify/http-server/pkg/acs3"
+	"github.com/pm-cloudify/shared-libs/acs3"
+	database "github.com/pm-cloudify/shared-libs/psql"
 )
 
 func main() {
@@ -40,7 +40,12 @@ func main() {
 	defer database.CloseDB()
 
 	// Initialize connection to s3
-	acs3.InitConnection()
+	acs3.InitConnection(
+		config.LoadedEnv.AC_AccessKey,
+		config.LoadedEnv.AC_SecretKey,
+		config.LoadedEnv.AC_S3_Region,
+		config.LoadedEnv.AC_S3_Endpoint,
+	)
 
 	// config and run server
 	server := config.ConfigGinServer(router)
