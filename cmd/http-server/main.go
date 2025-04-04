@@ -1,14 +1,10 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	v1 "github.com/pm-cloudify/http-server/internal/api/v1"
 	"github.com/pm-cloudify/http-server/internal/config"
-	"github.com/pm-cloudify/shared-libs/acs3"
-	database "github.com/pm-cloudify/shared-libs/psql"
+	"github.com/pm-cloudify/shared-libs/psql"
 )
 
 func main() {
@@ -21,31 +17,19 @@ func main() {
 	config.ConfigGinLogger(router)
 	config.ConfigMiddlewares(router)
 
-	// ping server
-	router.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
 	// setup routes
 	v1.SetupRoutes(router)
 
 	// Initialize a database
-	// TODO: use env
-	err := database.InitDB("postgres://test_user:Sample1234Pass@localhost:5432/pm_cloudify_db?sslmode=disable")
-	if err != nil {
-		log.Fatal("database connection failed!")
-	}
-	defer database.CloseDB()
+	config.MustInitDatabaseConnection()
+	defer psql.CloseDB()
 
 	// Initialize connection to s3
-	acs3.InitConnection(
-		config.LoadedEnv.AC_AccessKey,
-		config.LoadedEnv.AC_SecretKey,
-		config.LoadedEnv.AC_S3_Region,
-		config.LoadedEnv.AC_S3_Endpoint,
-	)
+	config.InitS3Connection()
+
+	// Initialize connection to RabbitMQ
+	app_mb := config.MustConnectToMessageBroker()
+	defer app_mb.Close()
 
 	// config and run server
 	server := config.ConfigGinServer(router)
