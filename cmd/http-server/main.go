@@ -1,17 +1,17 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	v1 "github.com/pm-cloudify/http-server/internal/api/v1"
 	"github.com/pm-cloudify/http-server/internal/config"
 	"github.com/pm-cloudify/shared-libs/psql"
 )
 
 func main() {
-	router := gin.New()
+	// create an engine
+	router := config.ConfigAndCreateGinEngine()
 
 	// loading env
-	config.MustLoadENV()
+	config.LoadConfigs()
 
 	// config router
 	config.ConfigGinLogger(router)

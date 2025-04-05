@@ -3,10 +3,10 @@ package services
 import (
 	"errors"
 	"log"
-	"os"
 	"regexp"
 	"strings"
 
+	"github.com/pm-cloudify/http-server/internal/config"
 	"github.com/pm-cloudify/shared-libs/auth"
 	database "github.com/pm-cloudify/shared-libs/psql"
 )
@@ -91,7 +91,7 @@ func Login(username, password string) (string, error) {
 		return "", errors.New("wrong password")
 	}
 
-	token, err := auth.GenerateToken(user.Username, os.Getenv("APP_SECRET"))
+	token, err := auth.GenerateToken(user.Username, config.AppConfigs.Secret)
 
 	if err != nil {
 		return "", err

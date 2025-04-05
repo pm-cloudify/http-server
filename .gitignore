@@ -3,6 +3,7 @@
 
 ### dotenv ###
 .env
+.env.*
 
 ### Go ###
 # If you prefer the allow list template instead of the deny list, see community template:
@@ -14,6 +15,10 @@
 *.dll
 *.so
 *.dylib
+# ignore binary directories
+build/
+bin/
+out/
 
 # Test binary, built with `go test -c`
 *.test

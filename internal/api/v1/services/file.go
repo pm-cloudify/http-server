@@ -4,9 +4,9 @@ import (
 	"errors"
 	"log"
 	"mime/multipart"
-	"os"
 
 	"github.com/pm-cloudify/http-server/internal/api/v1/models"
+	"github.com/pm-cloudify/http-server/internal/config"
 	"github.com/pm-cloudify/shared-libs/acs3"
 	database "github.com/pm-cloudify/shared-libs/psql"
 )
@@ -18,14 +18,14 @@ func UploadFile(file *multipart.FileHeader, username string) error {
 	}
 
 	// save data to s3
-	fileKey, err := acs3.UploadObject(os.Getenv("S3_BUCKET"), file)
+	fileKey, err := acs3.UploadObject(config.AppConfigs.AC_S3Bucket, file)
 	if err != nil {
 		return errors.New("cannot save file")
 	}
 
 	// save record to db hold id of created record
 	if err := database.AddUploadedFileInfo(file.Filename, username, fileKey); err != nil {
-		err2 := acs3.DeleteObject(os.Getenv("S3_BUCKET"), fileKey)
+		err2 := acs3.DeleteObject(config.AppConfigs.AC_S3Bucket, fileKey)
 		if err2 != nil {
 			log.Printf("error: file with no record exists. key ->\"%s\"\n", fileKey)
 		}

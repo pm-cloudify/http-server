@@ -3,16 +3,15 @@ package middleware
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pm-cloudify/http-server/internal/config"
 	"github.com/pm-cloudify/shared-libs/auth"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-
 		fmt.Println(c.Request.URL)
 
 		// getting auth header value
@@ -32,7 +31,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// validating the token
-		claims, err := auth.ValidateToken(tokenParts[1], os.Getenv("APP_SECRET"))
+		claims, err := auth.ValidateToken(tokenParts[1], config.AppConfigs.Secret)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
