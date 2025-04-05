@@ -1,0 +1,35 @@
+services:
+  main-server:
+    image: http-server:latest
+    container_name: main-server
+    ports:
+      - "5000:80"
+    environment:
+      - APP_ENV=production
+      - APP_SECRET=test-secret
+      - WS_PORT=80
+      - SECRET_KEY=
+      - ACCESS_KEY=
+      - S3_BUCKET=
+      - S3_ENDPOINT=
+      - S3_REGION=
+      - RMQ_ADDR=rabbitmq
+      - RMQ_USER=admin
+      - RMQ_PASS=TestRab1234
+      - RMQ_Q_NAME=jobs
+      - DB_USER=test_user
+      - DB_PASS=Sample1234Pass
+      - DB_HOST=local_postgres_test
+      - DB_NAME=pm_cloudify_db
+      - DB_SSL_MODE=disable
+    networks:
+      - rabbitmq_default
+      - db_postgres-net
+
+networks:
+  rabbitmq_default:
+    name: rabbitmq_default
+    external: true
+  db_postgres-net:
+    name: db_postgres-net
+    external: true

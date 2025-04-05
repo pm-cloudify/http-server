@@ -61,7 +61,7 @@ func LoadConfigs() {
 	// default configs if not given
 	viper.SetDefault("APP_ENV", "development")
 	viper.SetDefault("APP_SECRET", "your-secret") // TODO: generate a random hash for this in each run time
-	viper.SetDefault("WS_PORT", "5050")
+	viper.SetDefault("WS_PORT", "80")
 
 	// app
 	AppConfigs.Mode = viper.GetString("APP_ENV")
