@@ -91,7 +91,13 @@ func LoadConfigs() {
 	AppConfigs.AC_S3_Region = viper.GetString("S3_REGION")
 
 	if AppConfigs.Mode == "development" {
-		fmt.Println(AppConfigs)
+		log.Println(AppConfigs)
+	} else {
+		log.Printf(
+			"Mode: %s, server-port: %s\n",
+			AppConfigs.Mode,
+			AppConfigs.GIN_Port,
+		)
 	}
 }
 
@@ -213,12 +219,12 @@ func ConfigAndCreateGinEngine() *gin.Engine {
 	switch os.Getenv("APP_ENV") {
 	case "production":
 		gin.SetMode(gin.ReleaseMode)
-		fmt.Println("Running in PRODUCTION mode")
+		log.Println("Running in PRODUCTION mode")
 	case "staging":
 		gin.SetMode(gin.TestMode)
-		fmt.Println("Running in STAGING mode")
+		log.Println("Running in STAGING mode")
 	default:
-		fmt.Println("Running in DEVELOPMENT mode")
+		log.Println("Running in DEVELOPMENT mode")
 		gin.SetMode(gin.DebugMode)
 	}
 

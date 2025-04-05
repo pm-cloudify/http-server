@@ -7,11 +7,11 @@ import (
 )
 
 func main() {
-	// create an engine
-	router := config.ConfigAndCreateGinEngine()
-
-	// loading env
+	// loading configs
 	config.LoadConfigs()
+
+	// create a gin engine
+	router := config.ConfigAndCreateGinEngine()
 
 	// config router
 	config.ConfigGinLogger(router)
