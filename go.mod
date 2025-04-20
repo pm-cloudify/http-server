@@ -10,6 +10,8 @@ require (
 	github.com/spf13/viper v1.20.1
 )
 
+replace github.com/pm-cloudify/shared-libs => ../shared-libs
+
 require (
 	github.com/aws/aws-sdk-go v1.55.6 // indirect
 	github.com/bytedance/sonic v1.13.2 // indirect
