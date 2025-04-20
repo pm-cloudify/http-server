@@ -31,5 +31,5 @@ type FilesList struct {
 
 // job request body
 type JobRequest struct {
-	FileID uint `json:"file_id"`
+	FileID uint `form:"file_id" json:"file_id"`
 }
