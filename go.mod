@@ -6,7 +6,7 @@ require (
 	github.com/gin-contrib/cors v1.7.4
 	github.com/gin-gonic/gin v1.10.0
 	github.com/joho/godotenv v1.5.1
-	github.com/pm-cloudify/shared-libs v1.0.1
+	github.com/pm-cloudify/shared-libs v1.0.2
 	github.com/spf13/viper v1.20.1
 )
 
